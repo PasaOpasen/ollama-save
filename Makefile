@@ -6,4 +6,4 @@ load-script:
 
 
 build:
-	cd ollama_save; go build -buildvcs=false
+	cd ollama_save; go build -buildvcs=false -o ../ollama-save
