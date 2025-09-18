@@ -208,12 +208,19 @@ func getBlobPath(ollamaDir string, digest string) string {
 
 // getManifestBasePath returns the base path for manifest files
 func getManifestBasePath() string {
-	return filepath.Join("manifests", "registry.ollama.ai", "library")
+	return filepath.Join("manifests", "registry.ollama.ai")
 }
 
 // getManifestPath returns the full path for a model's manifest file
 func getManifestPath(model string, tag string) string {
-	return filepath.Join(getManifestBasePath(), model, tag)
+	parts := strings.SplitN(model, "/", 2)
+	if len(parts) > 2 {
+		panic(fmt.Sprintf("invalid model name %s", model))
+	}
+	if len(parts) == 2 {
+		return filepath.Join(getManifestBasePath(), parts[0], parts[1], tag)
+	}
+	return filepath.Join(getManifestBasePath(), "library", model, tag)
 }
 
 // addFileToTar adds a file to a tar archive
