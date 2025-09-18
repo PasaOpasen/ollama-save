@@ -7,9 +7,23 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 )
+
+func expand_user(path string) (string, error) {
+    if len(path) == 0 || path[0] != '~' {
+        return path, nil
+    }
+
+    usr, err := user.Current()
+    if err != nil {
+        return "", err
+    }
+    return filepath.Join(usr.HomeDir, path[1:]), nil
+}
+
 
 // ManifestLayer represents a layer in the Ollama manifest
 type ManifestLayer struct {
@@ -29,6 +43,12 @@ type Manifest struct {
 
 // ExportModels exports the specified models from the Ollama models directory to a tar.gz archive
 func ExportModels(ollamaDir string, models []string, outputPath string) error {
+
+	ollamaDir, err := expand_user(ollamaDir)
+	if err != nil {
+		return fmt.Errorf("failed to expand user: %v", err)
+	}
+
 	// Create the output file
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
@@ -92,6 +112,12 @@ func ExportModels(ollamaDir string, models []string, outputPath string) error {
 
 // ImportModels imports models from a tar.gz archive into the Ollama models directory
 func ImportModels(ollamaDir string, archivePath string) error {
+
+	ollamaDir, err := expand_user(ollamaDir)
+	if err != nil {
+		return fmt.Errorf("failed to expand user: %v", err)
+	}
+
 	// Open the archive file
 	archiveFile, err := os.Open(archivePath)
 	if err != nil {
